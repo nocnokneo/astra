@@ -3,7 +3,7 @@ set (_projname "calibrate")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 
 find_package(SFML COMPONENTS graphics window system)
-find_package(OpenCV REQUIRED core imgproc highgui)
+find_package(OpenCV REQUIRED core imgproc highgui calib3d)
 
 #maps relwithdebinfo to release, so don't include debug version of opencv
 set_target_properties(${OpenCV_LIBS} PROPERTIES MAP_IMPORTED_CONFIG_RELWITHDEBINFO RELEASE)

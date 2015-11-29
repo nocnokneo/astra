@@ -196,20 +196,37 @@ public:
         }
     }
 
+    void process_chessboard(Mat& mat)
+    {
+        Size boardSize(9,6);
+        vector<Point2f> pointbuf;
+
+        bool found = findChessboardCorners(mat, boardSize, pointbuf,
+            CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE);
+
+        if(!found)
+        {
+            return;
+        }
+        drawChessboardCorners(mat, boardSize, Mat(pointbuf), found );
+    }
+
     void process_cv_mat(astra::infraredframe_16& irFrame)
     {
-        copy_ir16_to_mat(irFrame, matIR_);
+        copy_ir16_to_mat(irFrame, matIR16_);
 
         double min, max;
-        cv::minMaxLoc(matIR_, &min, &max);
+        cv::minMaxLoc(matIR16_, &min, &max);
         printf("IR min: %f max %f\n", min, max);
-        double range = (max - min);
-        matIR_ = (matIR_ - min);
+        double scale = 255.0 / (max - min);
+        matIR16_ = (matIR16_ - min);
 
-        matIR_.convertTo(matViz_, CV_32FC1);
-        matViz_ /= range;
+        matIR16_.convertTo(matIR8_, CV_8UC1, scale);
+        cvtColor(matIR8_, matIR8color_, CV_GRAY2RGB);
 
-        imshow("Infrared", matViz_);
+        process_chessboard(matIR8color_);
+
+        imshow("Infrared", matIR8color_);
     }
 
     void update_ir_16(astra::frame& frame)
@@ -381,9 +398,9 @@ private:
     bool overlayDepth_{ false };
     bool isPaused_{ false };
 
-    Size boardSize;
-    Mat matIR_;
-    Mat matViz_;
+    Mat matIR16_;
+    Mat matIR8_;
+    Mat matIR8color_;
 };
 
 astra::depthstream configure_depth(astra::stream_reader& reader)
