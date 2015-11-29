@@ -196,19 +196,24 @@ public:
         }
     }
 
-    void process_chessboard(Mat& mat)
+    void process_chessboard(Mat& matColor, Mat& matGray)
     {
         Size boardSize(9,6);
         vector<Point2f> pointbuf;
 
-        bool found = findChessboardCorners(mat, boardSize, pointbuf,
+        bool found = findChessboardCorners(matGray, boardSize, pointbuf,
             CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE);
 
         if(!found)
         {
             return;
         }
-        drawChessboardCorners(mat, boardSize, Mat(pointbuf), found );
+
+        // improve the found corners' coordinate accuracy
+        cornerSubPix(matGray, pointbuf, Size(11,11),
+             Size(-1,-1), TermCriteria( CV_TERMCRIT_EPS+CV_TERMCRIT_ITER, 30, 0.1 ));
+
+        drawChessboardCorners(matColor, boardSize, Mat(pointbuf), found );
     }
 
     void process_cv_mat(astra::infraredframe_16& irFrame)
@@ -224,7 +229,7 @@ public:
         matIR16_.convertTo(matIR8_, CV_8UC1, scale);
         cvtColor(matIR8_, matIR8color_, CV_GRAY2RGB);
 
-        process_chessboard(matIR8color_);
+        process_chessboard(matIR8color_, matIR8_);
 
         imshow("Infrared", matIR8color_);
     }
