@@ -44,7 +44,7 @@ else()
   find_package(OpenCV REQUIRED core imgproc)
 endif()
 
-#maps relwithbedinfo to release, so don't include debug version of opencv
+#maps relwithdebinfo to release, so don't include debug version of opencv
 set_target_properties(${OpenCV_LIBS} PROPERTIES MAP_IMPORTED_CONFIG_RELWITHDEBINFO RELEASE)
 set_target_properties(${OpenCV_LIBS} PROPERTIES MAP_IMPORTED_CONFIG_MINSIZEREL RELEASE)
 
